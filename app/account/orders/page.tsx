@@ -60,7 +60,7 @@ if (error) {
   const assetIds = [
     ...new Set(
       (data ?? [])
-        .map((transaction) => transaction.asset_id)
+       .map((transaction: { asset_id: string | null }) => transaction.asset_id)
         .filter(Boolean)
     ),
   ];
@@ -85,11 +85,19 @@ if (error) {
     }
   }
 
-  const formattedOrders: Order[] = (data ?? []).map(
-    (transaction) => {
+ const formattedOrders: Order[] = (data ?? []).map(
+  (transaction: {
+    id: string;
+    transaction_type: string;
+    status: string;
+    asset_id: string | null;
+    amount: number | null;
+    metadata: unknown;
+    created_at: string;
+  }) => {
       const metadata =
         transaction.metadata &&
-        typeof transaction.metadata === "object"
+          typeof transaction.metadata === "object"
           ? transaction.metadata as Record<string, unknown>
           : {};
 

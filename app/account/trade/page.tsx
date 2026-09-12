@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
@@ -17,7 +17,7 @@ const BITCOIN_PAYMENT_ADDRESS =
   "bc1qwx90w9s588gyev4qrw45fe57gq5pwrhctte8f2";
 
 
-export default function TradePage() {
+function TradeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -615,5 +615,12 @@ function BackIcon() {
         strokeLinejoin="round"
       />
     </svg>
+  );
+}
+export default function TradePage() {
+  return (
+    <Suspense fallback={null}>
+      <TradeContent />
+    </Suspense>
   );
 }

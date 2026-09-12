@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import type { User } from "@supabase/supabase-js";
 
 export default function Navbar() {
@@ -14,8 +15,9 @@ export default function Navbar() {
     const supabase = createClient();
 
     const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+  data: { subscription },
+} = supabase.auth.onAuthStateChange(
+  (event: AuthChangeEvent, session: Session | null) => {
       setUser(session?.user ?? null);
       setLoading(false);
 
