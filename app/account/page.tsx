@@ -88,9 +88,42 @@ export default function AccountPage() {
         return;
       }
 
-      setUser(session.user);
+    
+setUser(session.user);
 
-      const [
+const { data: latestSnapshot } = await supabase
+  .from("portfolio_snapshots")
+  .select("created_at")
+  .eq("user_id", session.user.id)
+  .order("created_at", { ascending: false })
+  .limit(1)
+  .maybeSingle();
+
+const latestSnapshotDate = latestSnapshot?.created_at
+  ? new Date(latestSnapshot.created_at)
+  : null;
+
+const now = new Date();
+
+const snapshotExistsToday =
+  latestSnapshotDate &&
+  latestSnapshotDate.getFullYear() === now.getFullYear() &&
+  latestSnapshotDate.getMonth() === now.getMonth() &&
+  latestSnapshotDate.getDate() === now.getDate();
+
+if (!snapshotExistsToday) {
+  const { error: snapshotCreateError } =
+    await supabase.rpc("create_portfolio_snapshot");
+
+  if (snapshotCreateError) {
+    console.error(
+      "Portfolio snapshot creation error:",
+      JSON.stringify(snapshotCreateError, null, 2)
+    );
+  }
+}
+
+const [
         positionsResult,
         cashResult,
         snapshotsResult,
@@ -289,59 +322,23 @@ if (activitiesResult.error) {
     };
   }, [positions, cashBalances]);
 
-  const todayPerformance = useMemo(() => {
-  if (snapshots.length === 0) {
-    return {
-      value: 0,
-      percent: 0,
-    };
-  }
 
-  const currentValue = portfolio.totalPortfolioValue;
 
-  // Use the first snapshot recorded today as today's starting value.
-  const now = new Date();
-
-  const todaySnapshots = snapshots.filter(
-    (snapshot) => {
-      const snapshotDate = new Date(
-        snapshot.created_at
-      );
-
-      return (
-        snapshotDate.getFullYear() ===
-          now.getFullYear() &&
-        snapshotDate.getMonth() ===
-          now.getMonth() &&
-        snapshotDate.getDate() ===
-          now.getDate()
-      );
-    }
-  );
-
-  if (todaySnapshots.length === 0) {
-    return {
-      value: 0,
-      percent: 0,
-    };
-  }
-
-  const startingValue = Number(
-    todaySnapshots[0].portfolio_value ?? 0
-  );
-
-  const value = currentValue - startingValue;
-
-  const percent =
-    startingValue > 0
-      ? (value / startingValue) * 100
-      : 0;
+const todayPerformance = useMemo(() => {
+  const value = portfolio.totalReturn;
+  const percent = portfolio.totalReturnPercent;
 
   return {
     value,
     percent,
   };
-}, [snapshots, portfolio.totalPortfolioValue]);
+}, [
+  portfolio.totalReturn,
+  portfolio.totalReturnPercent,
+]);
+
+
+
   const chartSnapshots = useMemo(() => {
     if (snapshots.length === 0) {
       return [];

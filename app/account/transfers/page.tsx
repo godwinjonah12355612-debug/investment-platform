@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -29,6 +30,12 @@ export default function TransfersPage() {
 
   const [processing, setProcessing] = useState(false);
   const [message, setMessage] = useState("");
+
+  // Withdrawal-only state
+  const [showPin, setShowPin] = useState(false);
+  const [pin, setPin] = useState("");
+  const [withdrawalUnavailable, setWithdrawalUnavailable] =
+    useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -122,19 +129,49 @@ export default function TransfersPage() {
       return;
     }
 
-    setProcessing(true);
-    setMessage("Processing withdrawal...");
-
-    await new Promise((resolve) =>
-      setTimeout(resolve, 3000)
-    );
-
-    setProcessing(false);
-
-    setMessage(
-      "Withdrawal failed. Please contact customer support for assistance."
-    );
+    // Withdrawal only:
+    // Do not process the withdrawal.
+    // Show the 4-digit PIN input instead.
+    setShowPin(true);
+    setPin("");
+    setWithdrawalUnavailable(false);
+    setMessage("");
   };
+
+ const handlePinSubmit = async () => {
+  if (pin.length !== 4) {
+    setMessage("Enter your 4-digit security PIN.");
+    return;
+  }
+
+  /*
+    There is currently no PIN/security credential system
+    connected to the application.
+
+    Therefore:
+    - The PIN is NOT stored.
+    - The PIN is NOT verified.
+    - No withdrawal is created.
+    - No balance is deducted.
+    - No transaction is processed.
+
+    The confirmation button will remain in a loading
+    state for 4 seconds before showing withdrawal
+    as unavailable.
+  */
+
+  setProcessing(true);
+  setMessage("");
+
+  await new Promise((resolve) =>
+    setTimeout(resolve, 4000)
+  );
+
+  setProcessing(false);
+  setPin("");
+  setShowPin(false);
+  setWithdrawalUnavailable(true);
+};
 
   const handlePaymentSlipSubmit = async () => {
     if (paymentSubmitted) {
@@ -323,6 +360,11 @@ export default function TransfersPage() {
                   setPaymentSlip(null);
                   setPaymentSubmitted(false);
                   setProcessing(false);
+
+                  // Reset withdrawal-only state
+                  setShowPin(false);
+                  setPin("");
+                  setWithdrawalUnavailable(false);
                 }}
                 className={`rounded-lg py-3 text-xs font-semibold ${
                   type === "deposit"
@@ -343,6 +385,11 @@ export default function TransfersPage() {
                   setPaymentSlip(null);
                   setPaymentSubmitted(false);
                   setProcessing(false);
+
+                  // Withdrawal-only state
+                  setShowPin(false);
+                  setPin("");
+                  setWithdrawalUnavailable(false);
                 }}
                 className={`rounded-lg py-3 text-xs font-semibold ${
                   type === "withdraw"
@@ -383,10 +430,15 @@ export default function TransfersPage() {
                   min="0"
                   step="0.01"
                   value={amount}
-                  disabled={processing || paymentSubmitted}
+                  disabled={
+                    processing ||
+                    paymentSubmitted ||
+                    showPin
+                  }
                   onChange={(e) => {
                     setAmount(e.target.value);
                     setMessage("");
+                    setWithdrawalUnavailable(false);
                   }}
                   placeholder="0.00"
                   className="h-14 min-w-0 flex-1 bg-transparent px-3 text-2xl font-semibold outline-none placeholder:text-[#c5cbc6] disabled:cursor-not-allowed disabled:opacity-50"
@@ -404,10 +456,15 @@ export default function TransfersPage() {
                 <button
                   key={value}
                   type="button"
-                  disabled={processing || paymentSubmitted}
+                  disabled={
+                    processing ||
+                    paymentSubmitted ||
+                    showPin
+                  }
                   onClick={() => {
                     setAmount(value.toString());
                     setMessage("");
+                    setWithdrawalUnavailable(false);
                   }}
                   className="rounded-lg border border-[#dfe5df] bg-white px-3 py-2 text-[10px] font-medium text-[#68736b] hover:bg-[#f5f7f3] disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -507,6 +564,129 @@ export default function TransfersPage() {
               </div>
             )}
 
+            {/* WITHDRAWAL PIN PANEL */}
+            {type === "withdraw" && showPin && (
+              <div className="mt-6 rounded-2xl border border-[#dfe5df] bg-[#f8faf7] p-5">
+                <div className="text-center">
+                  <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-[#eaf6ef] text-[#16805a]">
+                    <LockIcon />
+                  </div>
+
+                  <p className="mt-4 text-sm font-semibold">
+                    Confirm withdrawal
+                  </p>
+
+                  <p className="mt-2 text-[10px] leading-5 text-[#718078]">
+                    Enter your 4-digit security PIN to
+                    continue with this withdrawal.
+                  </p>
+                </div>
+
+                <div className="mt-5">
+                  <label
+                    htmlFor="withdrawal-pin"
+                    className="text-xs font-semibold"
+                  >
+                    Security PIN
+                  </label>
+
+                  <input
+                    id="withdrawal-pin"
+                    type="password"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    maxLength={4}
+                    value={pin}
+                    onChange={(e) => {
+                      const value = e.target.value
+                        .replace(/\D/g, "")
+                        .slice(0, 4);
+
+                      setPin(value);
+                      setMessage("");
+                    }}
+                    placeholder="••••"
+                    className="mt-2 h-14 w-full rounded-xl border border-[#dfe5df] bg-white px-4 text-center text-xl font-semibold tracking-[0.45em] outline-none transition focus:border-[#16805a] focus:ring-4 focus:ring-[#16805a]/10"
+                  />
+
+                  <p className="mt-2 text-center text-[9px] text-[#929b95]">
+                    Enter exactly 4 digits.
+                  </p>
+                </div>
+
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPin(false);
+                      setPin("");
+                      setMessage("");
+                    }}
+                    className="h-11 rounded-xl border border-[#dfe5df] bg-white text-xs font-semibold text-[#68736b] transition hover:text-[#111613]"
+                  >
+                    Back
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={pin.length !== 4}
+                    onClick={handlePinSubmit}
+                    className="h-11 rounded-xl bg-[#111613] text-xs font-semibold text-white transition hover:bg-[#16805a] disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Confirm PIN
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* WITHDRAWAL UNAVAILABLE */}
+            {type === "withdraw" &&
+              withdrawalUnavailable && (
+                <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white">
+                      <AlertIcon />
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-semibold text-[#303731]">
+                        Withdrawal unavailable
+                      </p>
+
+                      <p className="mt-2 text-[10px] leading-5 text-[#68736b]">
+                        Withdrawals are currently
+                        unavailable. Please contact customer
+                        support for assistance with your
+                        withdrawal request.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push("/account/support")
+                    }
+                    className="mt-5 h-11 w-full rounded-xl bg-[#111613] text-xs font-semibold text-white transition hover:bg-[#16805a]"
+                  >
+                    Customer Support
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWithdrawalUnavailable(false);
+                      setPin("");
+                      setAmount("");
+                      setMessage("");
+                    }}
+                    className="mt-3 h-11 w-full rounded-xl border border-[#dfe5df] bg-white text-xs font-semibold text-[#68736b] transition hover:text-[#111613]"
+                  >
+                    Try another withdrawal
+                  </button>
+                </div>
+              )}
+
             {/* MESSAGE */}
             {message && (
               <div
@@ -515,36 +695,38 @@ export default function TransfersPage() {
                     ? "border-red-200 bg-red-50 text-red-700"
                     : message.includes("Processing")
                       ? "border-[#dfe5df] bg-[#f5f7f3] text-[#68736b]"
-                      : "border-[#cfe1d4] bg-[#edf7f0] text-[#16805a]"
+                      : message.includes("unavailable") ||
+                          message.includes("Insufficient")
+                        ? "border-red-200 bg-red-50 text-red-700"
+                        : "border-[#cfe1d4] bg-[#edf7f0] text-[#16805a]"
                 }`}
               >
                 {message}
               </div>
             )}
 
-            {/* CONTINUE */}
-            {type === "withdraw" && (
-  <button
-    type="button"
-    disabled={!canContinue}
-    onClick={handleContinue}
-    className="mt-6 h-12 w-full rounded-xl bg-[#111613] text-sm font-semibold text-white transition hover:bg-[#1b241f] disabled:cursor-not-allowed disabled:opacity-40"
-  >
-    {processing
-      ? "Processing..."
-      : "Continue withdrawal"}
-  </button>
-)}
-   
-   
-    
+            {/* CONTINUE WITHDRAWAL */}
+            {type === "withdraw" &&
+              !showPin &&
+              !withdrawalUnavailable && (
+                <button
+                  type="button"
+                  disabled={!canContinue}
+                  onClick={handleContinue}
+                  className="mt-6 h-12 w-full rounded-xl bg-[#111613] text-sm font-semibold text-white transition hover:bg-[#1b241f] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Continue withdrawal
+                </button>
+              )}
 
-            {type === "withdraw" && processing && (
+            {/* DEPOSIT PROCESSING
+                This remains for the existing deposit flow. */}
+            {type === "deposit" && processing && (
               <div className="mt-6 flex items-center justify-center gap-3 rounded-xl border border-[#dfe5df] bg-[#f8faf7] px-4 py-4">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#dfe5df] border-t-[#111613]" />
 
                 <span className="text-xs text-[#68736b]">
-                  Processing your withdrawal...
+                  Processing your deposit...
                 </span>
               </div>
             )}
@@ -608,18 +790,7 @@ export default function TransfersPage() {
               </div>
             </section>
 
-            <section className="rounded-3xl border border-[#dfe5df] bg-[#eef4ef] p-6">
-              <p className="text-xs font-semibold">
-                Account funds
-              </p>
-
-              <p className="mt-2 text-[10px] leading-5 text-[#718078]">
-                Deposits are submitted for review before
-                your account balance is updated.
-                Withdrawals are currently unavailable and
-                require customer support assistance.
-              </p>
-            </section>
+           
           </aside>
         </div>
       </section>
@@ -644,5 +815,64 @@ function SummaryRow({
         {value}
       </span>
     </div>
+  );
+}
+
+function LockIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <rect
+        x="5"
+        y="10"
+        width="14"
+        height="10"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
+
+      <path
+        d="M8 10V7a4 4 0 018 0v3"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function AlertIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <path
+        d="M12 8v4"
+        stroke="#c65b5b"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+
+      <circle
+        cx="12"
+        cy="16"
+        r="1"
+        fill="#c65b5b"
+      />
+
+      <path
+        d="M10.3 4.7L3.6 16.2c-.8 1.4.2 3.2 1.8 3.2h13.2c1.6 0 2.6-1.8 1.8-3.2L13.7 4.7c-.8-1.4-2.6-1.4-3.4 0z"
+        stroke="#c65b5b"
+        strokeWidth="1.5"
+      />
+    </svg>
   );
 }
