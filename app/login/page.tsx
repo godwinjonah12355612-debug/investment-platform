@@ -57,13 +57,7 @@ window.location.href = "/account";
 return (
     <main className="min-h-screen overflow-x-hidden bg-[#f7f8f5] text-[#111613]">
 
-      {/* DEMO NOTICE */}
-      <div className="border-b border-[#e1e5df] bg-[#eef3ed] px-4 py-2 text-center text-[10px] font-medium tracking-[0.08em] text-[#667169] sm:text-[11px]">
-        <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-[#16805a]" />
-        DEMO • EDUCATIONAL SIMULATION
-        <span className="mx-2 text-[#a3aca5]">•</span>
-        No real funds or securities are involved.
-      </div>
+     
 
       {/* HEADER */}
       <header className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
@@ -77,11 +71,11 @@ return (
 
             <div>
               <div className="text-sm font-bold tracking-[-0.02em] sm:text-[15px]">
-                Investment Platform
+                TradeStation
               </div>
 
               <div className="hidden text-[9px] uppercase tracking-[0.18em] text-[#89928b] sm:block">
-                Modern investing education
+                Modern investment
               </div>
             </div>
           </Link>
@@ -269,27 +263,10 @@ return (
             </p>
           </div>
 
-          {/* EDUCATIONAL NOTICE */}
-          <div className="mt-5 rounded-2xl border border-[#dce4dd] bg-[#eef3ed] p-4 text-center">
-            <div className="flex items-center justify-center gap-2">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#e2f1e8] text-[#16805a]">
-                <CheckIcon />
-              </span>
-
-              <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#5d6961]">
-                Educational simulation
-              </span>
-            </div>
-
-            <p className="mt-2 text-[10px] leading-5 text-[#7a847d]">
-              This platform is for educational purposes only.
-              No real funds or securities are involved.
-            </p>
-          </div>
 
           {/* FOOTER TEXT */}
           <p className="mt-6 text-center text-[9px] uppercase tracking-[0.1em] text-[#9aa29c]">
-            Investment Platform • Modern investing education
+            TradeStation • Modern investment
           </p>
         </div>
       </section>

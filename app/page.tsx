@@ -33,7 +33,7 @@ export default function Home() {
 
             <div>
               <div className="text-sm font-bold tracking-[-0.02em] sm:text-[15px]">
-                Investment Platform
+                TradeStation
               </div>
 
               <div className="hidden text-[9px] uppercase tracking-[0.18em] text-[#89928b] sm:block">
@@ -66,33 +66,23 @@ export default function Home() {
             </a>
           </div>
 
-          {/* ACTIONS */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            {isLoggedIn ? (
-              <a
-                href="/account"
-                className="rounded-xl bg-[#111613] px-5 py-2.5 text-[13px] font-semibold text-white shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-[#1b241f]"
-              >
-                Open dashboard
-              </a>
-            ) : (
-              <>
-                <a
-                  href="/login"
-                  className="rounded-xl px-4 py-2.5 text-[13px] font-medium text-[#4e5851] transition hover:bg-white"
-                >
-                  Log in
-                </a>
+      
+{/* ACTIONS */}
+<div className="flex items-center gap-1.5 sm:gap-2">
+  <a
+    href="/login"
+    className="rounded-xl px-4 py-2.5 text-[13px] font-medium text-[#4e5851] transition hover:bg-white"
+  >
+    Log in
+  </a>
 
-                <a
-                  href="/signup"
-                  className="rounded-xl bg-[#111613] px-5 py-2.5 text-[13px] font-semibold text-white shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-[#1b241f]"
-                >
-                  Get started
-                </a>
-              </>
-            )}
-          </div>
+  <a
+    href="/signup"
+    className="rounded-xl bg-[#111613] px-5 py-2.5 text-[13px] font-semibold text-white shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-[#1b241f]"
+  >
+    Get started
+  </a>
+</div>
         </nav>
       </header>
 
@@ -401,6 +391,75 @@ export default function Home() {
           </div>
         </div>
       </section>
+      {/* TESTIMONIALS */}
+<section className="border-y border-[#dfe4df] bg-white">
+  <div className="mx-auto max-w-[1440px] px-5 py-20 sm:px-8 sm:py-24 lg:px-12">
+    <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+      <div className="max-w-2xl">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#16805a]">
+          Investor perspectives
+        </p>
+
+        <h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">
+          Built for a clearer investing journey.
+        </h2>
+
+        <p className="mt-5 max-w-xl text-sm leading-6 text-[#737d76]">
+          Discover how investors approach portfolio building,
+          diversification, market research and long-term investing.
+        </p>
+      </div>
+    </div>
+
+    <div className="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <TestimonialCard
+        avatar="https://i.pravatar.cc/160?img=12"
+        quote="I have a much clearer view of my investments now. Being able to track my portfolio performance helps me stay focused on my long-term strategy."
+        name="Daniel Carter"
+      />
+
+      <TestimonialCard
+        avatar="https://i.pravatar.cc/160?img=47"
+        quote="Diversification became much easier for me to understand once I could see how each investment affected the overall balance of my portfolio."
+        name="Maya Thompson"
+      />
+
+      <TestimonialCard
+        avatar="https://i.pravatar.cc/160?img=11"
+        quote="I like being able to research market movements and then look at my own portfolio before making an investment decision."
+        name="Ethan Brooks"
+      />
+
+      <TestimonialCard
+        avatar="https://i.pravatar.cc/160?img=49"
+        quote="Investing used to feel complicated. Having everything organized in one place has helped me become more disciplined with my strategy."
+        name="Sofia Williams"
+      />
+
+      <TestimonialCard
+        avatar="https://i.pravatar.cc/160?img=68"
+        quote="The performance information helps me understand what is working in my portfolio and where I may need to reconsider my allocation."
+        name="Marcus Reed"
+      />
+
+      <TestimonialCard
+        avatar="https://i.pravatar.cc/160?img=44"
+        quote="I am much more comfortable thinking about investing as a long-term process instead of reacting to every short-term market movement."
+        name="Olivia Bennett"
+      />
+    </div>
+
+    <div className="mt-10 flex justify-center">
+      <a
+        href="/testimonials"
+        className="inline-flex items-center gap-2 rounded-xl border border-[#d9dfda] bg-white px-6 py-3 text-sm font-semibold text-[#222b25] transition hover:border-[#c6cec8] hover:bg-[#fbfcfa]"
+      >
+        View all testimonials
+        <ArrowIcon />
+      </a>
+    </div>
+  </div>
+</section>
 
       {/* FINAL CTA */}
       <section className="mx-auto max-w-[1440px] px-5 pb-20 sm:px-8 sm:pb-24 lg:px-12">
@@ -409,7 +468,7 @@ export default function Home() {
 
           <div className="relative max-w-2xl">
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#76b99b]">
-              Investment Platform
+              TradeStation
             </p>
 
             <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
@@ -452,7 +511,7 @@ export default function Home() {
                 </div>
 
                 <span className="text-sm font-bold">
-                  Investment Platform
+                  TradeStation
                 </span>
               </div>
 
@@ -490,7 +549,7 @@ export default function Home() {
           </div>
 
           <div className="mt-10 flex flex-col justify-between gap-3 border-t border-[#edf0ed] pt-6 text-[9px] uppercase tracking-[0.1em] text-[#9aa29c] sm:flex-row">
-            <span>© 2026 Investment Platform</span>
+            <span>© 2026 TradeStation</span>
 
             <span>Investment workspace</span>
           </div>
@@ -555,6 +614,53 @@ function FeatureCard({
 
       <p className="mt-2 text-xs leading-5 text-[#7b857e]">
         {description}
+      </p>
+    </div>
+  );
+}
+/* ----------------------------- */
+/* TESTIMONIAL CARD */
+/* ----------------------------- */
+
+function TestimonialCard({
+  avatar,
+  quote,
+  name,
+}: {
+  avatar: string;
+  quote: string;
+  name: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-[#dfe5df] bg-[#fbfcfa] p-6 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_15px_40px_rgba(20,35,25,0.06)]">
+      <div className="flex items-start gap-4">
+        <img
+          src={avatar}
+          alt=""
+          className="h-14 w-14 rounded-full object-cover ring-4 ring-[#eef3ee]"
+        />
+
+        <div className="pt-1">
+          <p className="text-sm font-semibold text-[#111613]">
+            {name}
+          </p>
+
+          <p className="mt-1 text-[9px] uppercase tracking-[0.1em] text-[#929b95]">
+            Individual investor
+          </p>
+
+          <div className="mt-2 flex gap-0.5 text-[13px] text-[#16805a]">
+            <span>★</span>
+            <span>★</span>
+            <span>★</span>
+            <span>★</span>
+            <span>★</span>
+          </div>
+        </div>
+      </div>
+
+      <p className="mt-6 text-sm leading-6 text-[#4f5a53]">
+        “{quote}”
       </p>
     </div>
   );

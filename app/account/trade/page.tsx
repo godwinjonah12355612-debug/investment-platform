@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -12,10 +13,6 @@ type Asset = {
   price: number;
   change: number;
 };
-
-const BITCOIN_PAYMENT_ADDRESS =
-  "bc1qwx90w9s588gyev4qrw45fe57gq5pwrhctte8f2";
-
 
 function TradeContent() {
   const router = useRouter();
@@ -35,10 +32,7 @@ function TradeContent() {
   const [quantity, setQuantity] = useState("1");
   const [limitPrice, setLimitPrice] = useState("");
   const [submitting, setSubmitting] = useState(false);
-const [tradeMessage, setTradeMessage] = useState("");
-const [copied, setCopied] = useState(false);
-const [paymentSlip, setPaymentSlip] = useState<File | null>(null);
-const [paymentSubmitted, setPaymentSubmitted] = useState(false);
+  const [tradeMessage, setTradeMessage] = useState("");
 
   useEffect(() => {
     const supabase = createClient();
@@ -54,154 +48,147 @@ const [paymentSubmitted, setPaymentSubmitted] = useState(false);
       }
 
       setUser(user);
+
       const { data: balance, error: balanceError } = await supabase
-  .from("cash_balances")
-  .select("available_balance")
-  .eq("user_id", user.id)
-  .eq("currency", "USD")
-  .maybeSingle();
+        .from("cash_balances")
+        .select("available_balance")
+        .eq("user_id", user.id)
+        .eq("currency", "USD")
+        .maybeSingle();
 
-if (balanceError) {
-  console.error("Trade balance error:", balanceError);
-}
+      if (balanceError) {
+        console.error("Trade balance error:", balanceError);
+      }
 
-setCashBalance(Number(balance?.available_balance ?? 0));
-const { data: dbAssets, error: assetsError } = await supabase
-  .from("assets")
-  .select("symbol, name, asset_type, current_price, price_change_24h")
-  .eq("is_active", true)
-  .in("asset_type", ["stock", "etf"])
-  .order("symbol");
+      setCashBalance(Number(balance?.available_balance ?? 0));
 
-if (assetsError) {
-  console.error("Trade assets error:", assetsError);
-} else {
- const formattedAssets: Asset[] = (dbAssets ?? []).map((asset: {
-  symbol: string;
-  name: string;
-  asset_type: string;
-  current_price: number | null;
-  price_change_24h: number | null;
-}) => ({
+      const { data: dbAssets, error: assetsError } = await supabase
+        .from("assets")
+        .select(
+          "symbol, name, asset_type, current_price, price_change_24h"
+        )
+        .eq("is_active", true)
+        .in("asset_type", ["stock", "etf"])
+        .order("symbol");
 
-    symbol: asset.symbol,
-    name: asset.name,
-    type:
-      asset.asset_type === "stock"
-        ? "Stock"
-        : asset.asset_type === "etf"
-          ? "ETF"
-          : "Crypto",
-    price: Number(asset.current_price ?? 0),
-    change: Number(asset.price_change_24h ?? 0),
-  }));
+      if (assetsError) {
+        console.error("Trade assets error:", assetsError);
+      } else {
+        const formattedAssets: Asset[] = (dbAssets ?? []).map(
+          (asset: {
+            symbol: string;
+            name: string;
+            asset_type: string;
+            current_price: number | null;
+            price_change_24h: number | null;
+          }) => ({
+            symbol: asset.symbol,
+            name: asset.name,
+            type:
+              asset.asset_type === "stock"
+                ? "Stock"
+                : asset.asset_type === "etf"
+                  ? "ETF"
+                  : "Crypto",
+            price: Number(asset.current_price ?? 0),
+            change: Number(asset.price_change_24h ?? 0),
+          })
+        );
 
-  setMarketAssets(formattedAssets);
-}
+        setMarketAssets(formattedAssets);
+      }
 
-setLoading(false);
-    
-};
+      setLoading(false);
+    };
 
     checkUser();
   }, [router]);
-const selectedAsset = useMemo(() => {
-  return marketAssets.find(
-    (asset) => asset.symbol === selectedSymbol
-  ) ?? marketAssets[0];
-}, [marketAssets, selectedSymbol]);
 
-if (loading) {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f5f7f3]">
-      <p className="text-sm text-[#68736b]">
-        Loading trade workspace...
-      </p>
-    </main>
-  );
-}
+  const selectedAsset = useMemo(() => {
+    return (
+      marketAssets.find((asset) => asset.symbol === selectedSymbol) ??
+      marketAssets[0]
+    );
+  }, [marketAssets, selectedSymbol]);
 
-if (!selectedAsset) {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f5f7f3]">
-      <p className="text-sm text-[#68736b]">
-        No tradable assets available.
-      </p>
-    </main>
-  );
-}
-
-const numericQuantity = Number(quantity) || 0;
-
-const executionPrice =
-  orderType === "limit" && Number(limitPrice) > 0
-    ? Number(limitPrice)
-    : selectedAsset.price;
-
-const estimatedTotal = numericQuantity * executionPrice;
- const copyBitcoinAddress = async () => {
-  try {
-    await navigator.clipboard.writeText(BITCOIN_PAYMENT_ADDRESS);
-    setCopied(true);
-
-    setTimeout(() => {
-      setCopied(false);
-    }, 2000);
-  } catch (error) {
-    console.error("Copy address error:", error);
-  }
-};
-
-const handleTrade = async () => {
-    
-  if (!user) return;
-
-  if (numericQuantity <= 0) {
-    setTradeMessage("Enter a valid quantity.");
-    return;
+  if (loading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#f5f7f3]">
+        <p className="text-sm text-[#68736b]">
+          Loading trade workspace...
+        </p>
+      </main>
+    );
   }
 
-  if (executionPrice <= 0) {
-    setTradeMessage("Invalid execution price.");
-    return;
+  if (!selectedAsset) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#f5f7f3]">
+        <p className="text-sm text-[#68736b]">
+          No tradable assets available.
+        </p>
+      </main>
+    );
   }
 
-  setSubmitting(true);
-  setTradeMessage("");
+  const numericQuantity = Number(quantity) || 0;
 
-  const supabase = createClient();
-
-const { data, error } = await supabase.rpc("execute_trade", {
-  p_asset_symbol: selectedAsset.symbol,
-  p_side: side,
-  p_quantity: numericQuantity,
-  p_order_type: orderType,
-  p_limit_price:
+  const executionPrice =
     orderType === "limit" && Number(limitPrice) > 0
       ? Number(limitPrice)
-      : null,
-});
+      : selectedAsset.price;
 
-  if (error) {
-    console.error("Trade error:", error);
-    setTradeMessage(error.message);
+  const estimatedTotal = numericQuantity * executionPrice;
+
+  const handleTrade = async () => {
+    if (!user) return;
+
+    if (numericQuantity <= 0) {
+      setTradeMessage("Enter a valid quantity.");
+      return;
+    }
+
+    if (executionPrice <= 0) {
+      setTradeMessage("Invalid execution price.");
+      return;
+    }
+
+    setSubmitting(true);
+    setTradeMessage("");
+
+    const supabase = createClient();
+
+    const { data, error } = await supabase.rpc("execute_trade", {
+      p_asset_symbol: selectedAsset.symbol,
+      p_side: side,
+      p_quantity: numericQuantity,
+      p_order_type: orderType,
+      p_limit_price:
+        orderType === "limit" && Number(limitPrice) > 0
+          ? Number(limitPrice)
+          : null,
+    });
+
+    if (error) {
+      console.error("Trade error:", error);
+      setTradeMessage(error.message);
+      setSubmitting(false);
+      return;
+    }
+
+    console.log("TRADE SUCCESS:", data);
+
+    setTradeMessage(
+      `${side === "buy" ? "Bought" : "Sold"} ${numericQuantity} ${selectedAsset.symbol} successfully.`
+    );
+
     setSubmitting(false);
-    return;
-  }
 
-  console.log("TRADE SUCCESS:", data);
-
-  setTradeMessage(
-    `${side === "buy" ? "Bought" : "Sold"} ${numericQuantity} ${selectedAsset.symbol} successfully.`
-  );
-
-  setSubmitting(false);
-
-  setTimeout(() => {
-    router.push("/account");
-    router.refresh();
-  }, 800);
-};
+    setTimeout(() => {
+      router.push("/account");
+      router.refresh();
+    }, 800);
+  };
 
   return (
     <main className="min-h-screen bg-[#f5f7f3] text-[#111613]">
@@ -355,6 +342,7 @@ const { data, error } = await supabase.rpc("execute_trade", {
                     <p className="text-xs font-semibold">
                       Market
                     </p>
+
                     <p className="mt-1 text-[9px] text-[#89928b]">
                       Execute at current price
                     </p>
@@ -371,6 +359,7 @@ const { data, error } = await supabase.rpc("execute_trade", {
                     <p className="text-xs font-semibold">
                       Limit
                     </p>
+
                     <p className="mt-1 text-[9px] text-[#89928b]">
                       Set your preferred price
                     </p>
@@ -421,14 +410,14 @@ const { data, error } = await supabase.rpc("execute_trade", {
               </p>
 
               <h2 className="mt-1 text-xl font-semibold">
-  {side === "buy" ? "Buy" : "Sell"}{" "}
-  {selectedAsset.symbol}
-</h2>
+                {side === "buy" ? "Buy" : "Sell"}{" "}
+                {selectedAsset.symbol}
+              </h2>
+
               <div className="mt-7 space-y-4">
                 <ReviewRow
                   label="Available cash"
-                 value={formatCurrency(cashBalance)}
-                
+                  value={formatCurrency(cashBalance)}
                 />
 
                 <ReviewRow
@@ -459,107 +448,48 @@ const { data, error } = await supabase.rpc("execute_trade", {
                 </div>
               </div>
 
-{tradeMessage && (
-  <div className="mt-4 rounded-xl border border-[#dfe5df] bg-[#f5f7f3] px-4 py-3 text-center text-xs text-[#68736b]">
-    {tradeMessage}
-  </div>
-)}
+              {tradeMessage && (
+                <div className="mt-4 rounded-xl border border-[#dfe5df] bg-[#f5f7f3] px-4 py-3 text-center text-xs text-[#68736b]">
+                  {tradeMessage}
+                </div>
+              )}
 
-{side === "buy" && (
-  <div className="mt-5 rounded-2xl border border-[#dfe5df] bg-[#f8faf7] p-4">
-    <p className="text-xs font-semibold text-[#111613]">
-      {side === "buy"
-        ? "Complete your purchase"
-        : "Complete your sale"}
-    </p>
+              <button
+                type="button"
+                disabled={
+                  submitting ||
+                  numericQuantity <= 0 ||
+                  executionPrice <= 0
+                }
+                onClick={() => {
+                  if (side === "sell") {
+                    setSubmitting(true);
+                    setTradeMessage("");
 
-    <p className="mt-2 text-[10px] leading-5 text-[#7b857e]">
-      {side === "buy"
-        ? "Send the required payment to the Bitcoin wallet address below. Copy the address carefully before making your payment."
-        : "For this sale, use the Bitcoin wallet address below for the required transaction instructions. Copy the address carefully and keep your transaction details."}
-    </p>
+                    setTimeout(() => {
+                      setSubmitting(false);
+                      setTradeMessage(
+                        "Sell request failed. Please contact customer support for assistance."
+                      );
+                    }, 3000);
 
-    <div className="mt-3 rounded-xl border border-[#dfe5df] bg-white p-3">
-      <p className="break-all text-[10px] font-medium leading-5 text-[#4f5a52]">
-        {BITCOIN_PAYMENT_ADDRESS}
-      </p>
-    </div>
+                    return;
+                  }
 
-    <button
-      type="button"
-      onClick={copyBitcoinAddress}
-      className="mt-3 w-full rounded-xl border border-[#dfe5df] bg-white px-4 py-3 text-xs font-semibold text-[#111613] transition hover:bg-[#f5f7f3]"
-    >
-      {copied ? "Copied ✓" : "Copy address"}
-    </button>
-
-    <div className="mt-4">
-  <label className="text-xs font-semibold text-[#111613]">
-    Upload payment slip
-  </label>
-
-  <input
-    type="file"
-    accept="image/*,.pdf"
-    onChange={(e) => setPaymentSlip(e.target.files?.[0] ?? null)}
-    className="mt-2 block w-full rounded-xl border border-[#dfe5df] bg-white px-3 py-3 text-xs text-[#68736b] file:mr-3 file:rounded-lg file:border-0 file:bg-[#f5f7f3] file:px-3 file:py-2 file:text-xs file:font-semibold file:text-[#111613]"
-  />
-
-  {paymentSlip && (
-    <p className="mt-2 text-[10px] text-[#68736b]">
-      Selected: {paymentSlip.name}
-    </p>
-  )}
-</div>
-  </div>
-)}
-
-<button
-  type="button"
-  disabled={
-    submitting ||
-    paymentSubmitted ||
-    numericQuantity <= 0 ||
-    executionPrice <= 0 ||
-    (side === "buy" && !paymentSlip)
-  }
-  onClick={() => {
-    setSubmitting(true);
-    setTradeMessage("");
-
-    if (side === "sell") {
-      setTimeout(() => {
-        setSubmitting(false);
-        setTradeMessage(
-          "Sell request failed. Please contact customer support for assistance."
-        );
-      }, 3000);
-
-      return;
-    }
-
-    setTimeout(() => {
-      setPaymentSubmitted(true);
-      setSubmitting(false);
-      setTradeMessage(
-        "Payment slip submitted for review. Your order will remain pending until the payment is reviewed."
-      );
-    }, 500);
-  }}
-  className={`mt-7 h-12 w-full rounded-xl text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-40 ${
-    side === "buy"
-      ? "bg-[#16805a] hover:bg-[#126d4d]"
-      : "bg-[#111613] hover:bg-[#1b241f]"
-  }`}
->
-  {submitting
-    ? "Processing..."
-    : paymentSubmitted && side === "buy"
-      ? "Payment Submitted"
-      : side === "sell"
-        ? "Submit Sell Request"
-        : "Submit Buy Request"}
-</button>
+                  handleTrade();
+                }}
+                className={`mt-7 h-12 w-full rounded-xl text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-40 ${
+                  side === "buy"
+                    ? "bg-[#16805a] hover:bg-[#126d4d]"
+                    : "bg-[#111613] hover:bg-[#1b241f]"
+                }`}
+              >
+                {submitting
+                  ? "Processing..."
+                  : side === "sell"
+                    ? "Submit Sell Request"
+                    : "Submit Buy Request"}
+              </button>
 
               <p className="mt-4 text-center text-[9px] leading-5 text-[#929b95]">
                 Orders are reviewed before execution.
@@ -606,7 +536,12 @@ function formatCurrency(value: number) {
 
 function BackIcon() {
   return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+    <svg
+      width="17"
+      height="17"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
       <path
         d="M19 12H5M11 6l-6 6 6 6"
         stroke="currentColor"
@@ -617,6 +552,7 @@ function BackIcon() {
     </svg>
   );
 }
+
 export default function TradePage() {
   return (
     <Suspense fallback={null}>

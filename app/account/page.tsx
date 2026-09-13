@@ -145,9 +145,9 @@ export default function AccountPage() {
 
       if (positionsResult.error) {
         console.error(
-          "Overview positions error:",
-          positionsResult.error
-        );
+  "Overview positions error:",
+  JSON.stringify(positionsResult.error, null, 2)
+);
       }
 
       if (cashResult.error) {
@@ -163,13 +163,12 @@ export default function AccountPage() {
           snapshotsResult.error
         );
       }
-
-      if (activitiesResult.error) {
-        console.error(
-          "Overview activity error:",
-          activitiesResult.error
-        );
-      }
+if (activitiesResult.error) {
+  console.error(
+    "Overview activity error:",
+    JSON.stringify(activitiesResult.error, null, 2)
+  );
+}
 
       if (assetsResult.error) {
         console.error(
@@ -510,7 +509,7 @@ export default function AccountPage() {
 
               <div>
                 <div className="text-sm font-bold">
-                  Investment Platform
+                  TradeStation
                 </div>
 
                 <div className="text-[9px] uppercase tracking-[0.16em] text-[#909991]">
@@ -1120,6 +1119,22 @@ export default function AccountPage() {
                 >
                   Convert currencies
                 </button>
+                <button
+  onClick={() =>
+    router.push("/account/transfers?type=withdraw")
+  }
+  className="mt-3 w-full rounded-xl bg-[#111613] px-4 py-2.5 text-[10px] font-semibold text-white transition hover:bg-[#1b241f]"
+>
+  Withdraw
+</button>
+<button
+  onClick={() =>
+    router.push("/account/send-money")
+  }
+  className="mt-3 w-full rounded-xl border border-[#dfe5df] bg-white px-4 py-2.5 text-[10px] font-semibold text-[#111613] transition hover:bg-[#f5f7f3]"
+>
+  Send Money
+</button>
               </section>
             </section>
 

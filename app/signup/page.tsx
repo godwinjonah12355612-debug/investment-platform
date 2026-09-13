@@ -53,12 +53,13 @@ export default function SignupPage() {
         },
       },
     });
-
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-      return;
-    }
+    
+if (error) {
+  console.error("Signup error:", error);
+  setError(error.message);
+  setLoading(false);
+  return;
+}
 
     setMessage(
       "Account created successfully. Please check your email to confirm your account."
@@ -74,16 +75,7 @@ export default function SignupPage() {
 
   return (
     <main className="min-h-screen bg-[#f7f8f5] text-[#111613]">
-      {/* Demo Notice */}
-      <div className="border-b border-[#e1e5df] bg-[#eef3ed]">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-center gap-2 px-5 py-2.5 text-center text-xs font-medium text-[#68736b] sm:px-8 lg:px-12">
-          <span className="h-2 w-2 rounded-full bg-[#16805a]" />
-          <span>DEMO • EDUCATIONAL SIMULATION</span>
-          <span className="hidden sm:inline">
-            No real funds or securities are involved.
-          </span>
-        </div>
-      </div>
+     
 
       {/* Header */}
       <header className="mx-auto flex h-20 max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-12">
@@ -120,8 +112,7 @@ export default function SignupPage() {
               </h1>
 
               <p className="mt-2 text-sm leading-6 text-[#68736b]">
-                Start exploring the Investment Platform educational
-                simulation.
+                Start exploring the Investment Platform
               </p>
             </div>
 
@@ -302,10 +293,7 @@ export default function SignupPage() {
             </div>
           </div>
 
-          <div className="mt-5 text-center text-xs leading-5 text-[#8a938d]">
-            This platform is an educational simulation. No real funds or
-            securities are involved.
-          </div>
+          
         </div>
       </section>
     </main>

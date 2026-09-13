@@ -9,8 +9,9 @@ export default function SettingsPage() {
   const router = useRouter();
 
   const [user, setUser] = useState<User | null>(null);
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
+const [fullName, setFullName] = useState("");
+const [email, setEmail] = useState("");
+const [accountNumber, setAccountNumber] = useState("");
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -51,11 +52,28 @@ export default function SettingsPage() {
         session.user.user_metadata?.full_name ||
         session.user.user_metadata?.name ||
         "";
+setFullName(name);
+setEmail(session.user.email ?? "");
 
-      setFullName(name);
-      setEmail(session.user.email ?? "");
+const { data: profile, error: profileError } =
+  await supabase
+    .from("profiles")
+    .select("account_number")
+    .eq("id", session.user.id)
+    .maybeSingle();
 
-      setLoading(false);
+if (profileError) {
+  console.error(
+    "Profile account number error:",
+    profileError
+  );
+} else {
+  setAccountNumber(
+    profile?.account_number ?? ""
+  );
+}
+
+setLoading(false);
     };
 
     loadUser();
@@ -499,8 +517,46 @@ export default function SettingsPage() {
                 )}
               </div>
             </section>
+            {/* INVESTMENT ACCOUNT */}
+<section className="mt-5 rounded-3xl border border-[#dfe5df] bg-white p-5 shadow-[0_12px_35px_rgba(20,35,25,0.04)] sm:p-6">
+  <div>
+    <p className="text-xs text-[#89928b]">
+      Investment account
+    </p>
+
+    <h3 className="mt-1 text-lg font-semibold">
+      Account number
+    </h3>
+  </div>
+
+  <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+    <div className="min-w-0 flex-1 rounded-xl border border-[#dfe5df] bg-[#fbfcfa] px-4 py-3">
+      <p className="break-all text-sm font-semibold tracking-[0.04em] text-[#111613]">
+        {accountNumber || "Account number unavailable"}
+      </p>
+    </div>
+
+    <button
+      type="button"
+      onClick={() => {
+        if (accountNumber) {
+          navigator.clipboard.writeText(accountNumber);
+        }
+      }}
+      disabled={!accountNumber}
+      className="rounded-xl bg-[#111613] px-5 py-3 text-xs font-semibold text-white transition hover:bg-[#242a26] disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      Copy
+    </button>
+  </div>
+
+  <p className="mt-3 text-[9px] text-[#929b95]">
+    Use this account number when receiving transfers from another Investment Platform user.
+  </p>
+</section>
 
             {/* SECURITY */}
+
             <section className="mt-5 rounded-3xl border border-[#dfe5df] bg-white p-5 shadow-[0_12px_35px_rgba(20,35,25,0.04)] sm:p-6">
 
               <div>
