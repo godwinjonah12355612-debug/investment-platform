@@ -60,6 +60,7 @@ export default function AccountPage() {
 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [greeting, setGreeting] = useState("Good morning");
 
   const [positions, setPositions] = useState<Position[]>([]);
   const [cashBalances, setCashBalances] = useState<CashBalance[]>([]);
@@ -232,7 +233,29 @@ if (activitiesResult.error) {
     return () => {
       mounted = false;
     };
-  }, [router]);
+    }, [router]);
+
+  // REAL-TIME GREETING
+  useEffect(() => {
+    const updateGreeting = () => {
+      const hour = new Date().getHours();
+
+      if (hour < 12) {
+        setGreeting("Good morning");
+      } else if (hour < 18) {
+        setGreeting("Good afternoon");
+      } else {
+        setGreeting("Good evening");
+      }
+    };
+
+    updateGreeting();
+
+    // Check every minute so the greeting changes automatically
+    const interval = setInterval(updateGreeting, 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const displayName =
     user?.user_metadata?.full_name ||
@@ -709,10 +732,15 @@ const todayPerformance = useMemo(() => {
                   <p className="text-[9px] uppercase tracking-[0.15em] text-[#9aa39d]">
                     Overview
                   </p>
+         
+
 
                   <h1 className="mt-1 text-xl font-semibold tracking-[-0.03em]">
-                    Good morning, {displayName}
-                  </h1>
+  {greeting}, {displayName}
+</h1>                
+
+
+
                 </div>
               </div>
 
